@@ -4,7 +4,7 @@ import sys
 
 # ----Game Settings---- #
 CELL_SIZE = 10
-BOARD_SIZE = (600, 600)
+BOARD_SIZE = (500, 500)
 GRID_SIZE = BOARD_SIZE[0] // CELL_SIZE
 FPS = 20
 
@@ -79,14 +79,16 @@ screen = pygame.display.set_mode(BOARD_SIZE)
 life_matrix = [[random.randint(0, 1) for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
 clock = pygame.time.Clock()
 
-
 def run(game_matrix):
     """"Runs the game loop until user exists via exit button.
     Draws the screen by draw function, and sets game_matrix to next_gen
 
     """
     paused = False
+    left_mouse_pressed = False
+    right_mouse_pressed = False
     while True:
+
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -94,6 +96,40 @@ def run(game_matrix):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:  # Pausing/Unpausing
                     paused = not paused
+                if event.key == pygame.K_c:
+                    if paused:
+                        for row in range(GRID_SIZE):
+                            for col in range(GRID_SIZE):
+                                life_matrix[row][col] = 0
+                    
+            
+            draw()           
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    left_mouse_pressed = False
+                if event.button == 3:
+                    right_mouse_pressed = False
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    left_mouse_pressed = True
+                if event.button == 3:
+                    right_mouse_pressed = True
+
+        
+            if event.type == pygame.MOUSEMOTION:
+                if left_mouse_pressed:
+                    mx, my = pygame.mouse.get_pos()
+                    life_matrix[mx//CELL_SIZE][my//CELL_SIZE] = 1
+                    draw()
+                if right_mouse_pressed:
+                    mx, my = pygame.mouse.get_pos()
+                    life_matrix[mx//CELL_SIZE][my//CELL_SIZE] = 0
+                    draw()
+                        
+                     
+
         if not paused:
             draw()
             game_matrix = calc_next_gen(game_matrix)
